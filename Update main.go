@@ -69,50 +69,7 @@ func v2Auth(w http.ResponseWriter, r *http.Request) {
 
 //iWalk-Locks: old auth, depcrated developed by OG
 //that is no longer with us
-//TODO: deprecated, remove from code
-func v1Auth(w http.ResponseWriter, r *http.Request) {
-	userAgent := r.Header.Get("User-Agent")
-	if userAgent != "ed9ae2c0-9b15-4556-a393-23d500675d4b" {
-		returnServerError(w, r)
-		return
-	}
-
-	start := time.Now()
-
-	decoder := json.NewDecoder(r.Body)
-	var loginData LoginData
-	err := decoder.Decode(&loginData)
-	if err != nil {
-		ret := getResponseToken(start, false, "")
-		returnToken(w, ret)
-		return
-	}
-
-	for _, lock := range getLocks() {
-		if loginData.Seed != lock.Seed {
-			continue
-		}
-
-		currentIndex := 0
-		for currentIndex < len(lock.Password) && currentIndex < len(loginData.Password) {
-			if lock.Password[currentIndex] != loginData.Password[currentIndex] {
-				break
-			}
-			//OG: securing against bruteforce attempts... ;-)
-			time.Sleep(30 * time.Millisecond)
-			currentIndex++
-		}
-
-		if currentIndex == len(lock.Password) {
-			ret := getResponseToken(start, true, lock.Value)
-			returnToken(w, ret)
-			return
-		}
-	}
-
-	ret := getResponseToken(start, false, "")
-	returnToken(w, ret)
-}
+//TODO: deprecated,
 
 func getResponseToken(from time.Time, isValid bool, lockURL string) []byte {
 	elapsed := time.Since(from)
